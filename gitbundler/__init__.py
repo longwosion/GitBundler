@@ -96,6 +96,7 @@ class PullCommand(Command):
     has_options = True
     option_list = (
         make_option('-b', '--bundle', action="store", dest="bundle", help='client bundle name'),
+        make_option('--branch', action="store", dest="force_branch", help='force branch for creating local branch'),
     )
     
     def handle(self, options, global_options, *args):
@@ -103,15 +104,13 @@ class PullCommand(Command):
         from server import GitBundlerClient
         config = GitBundlerConfig()
         
-        if options.bundle:
-            client = GitBundlerClient()
-            if client:
-                return client.pullbundle(options.bundle)
-        else:
-            client = GitBundlerClient()
-            if client:
+        client = GitBundlerClient()
+        if client:
+            if options.bundle:
+                return client.pullbundle(options.bundle, force_branch=options.force_branch)
+            else:
                 path = os.getcwd()
-                return client.pulldir(path)
+                return client.pulldir(path, force_branch=options.force_branch)
             
         self.print_help(__prog_name__, self.name)
     
@@ -147,13 +146,39 @@ class DownloadCommand(Command):
                     client.download(filename)
             return 
         self.print_help(__prog_name__, self.name)
+        
+class LocalPullCommand(Command):
+    name = 'lpull'
+    args = '<remote> <remote_branch> ...'
+    has_options = True
+    option_list = (
+        make_option('-b', '--bundle', action="store", dest="bundle", help='server bundle name'),
+    )
     
+    def handle(self, options, global_options, *args):
+        from config import GitBundlerConfig
+        from server import GitBundlerServer
+        config = GitBundlerConfig()
+        
+        server = GitBundlerServer()
+        path = path = os.getcwd()
+        
+        if server and server.guess_bundle(name=options.bundle, path=path):
+            if len(args) == 2:
+                server.lpush(args[0], branch=args[1])
+
+            if len(args) == 1:
+                server.lpush(args[0])
+                
+            if len(args) == 0:
+                server.lpush('local')
 
 register_command(ConfigCommand)
 register_command(PushCommand)
 register_command(PullCommand)    
 register_command(UploadCommand)    
-register_command(DownloadCommand)    
+register_command(DownloadCommand)  
+register_command(LocalPullCommand)  
 
 def main():
     modules = []

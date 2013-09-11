@@ -111,11 +111,10 @@ class GitBundlerConfig(object):
         repo = self.get('server.bundles.%s.repo' % bundle, verbose=False)
         filename = self.get('server.bundles.%s.filename' % bundle, verbose=False)
         options = self.get('server.bundles.%s.options' % bundle, verbose=False)
-        branch = self.get('server.bundles.%s.branch' % bundle, verbose=False)
-        if not (repo and filename and options and branch):
+        if not (repo and filename and options):
             print "error: can not find server bundle with name %s" % bundle
         
-        return (repo, filename, options, branch)
+        return (repo, filename, options)
     
     def get_serverbundle_match(self, path):
         for key, value in self.__items(show_section=False):
@@ -125,16 +124,15 @@ class GitBundlerConfig(object):
                     bundle = key.split(".")[2]
                     return self.get_serverbundle(bundle)
         print "error: can not find server bundle match current path %s" % path                
-        return (None, None, None, None)
+        return (None, None, None)
         
     def get_clientbundle(self, bundle):
         repo = self.get('client.bundles.%s.repo' % bundle, verbose=False)
         filename = self.get('client.bundles.%s.filename' % bundle, verbose=False)
-        branch = self.get('client.bundles.%s.branch' % bundle, verbose=False)
-        if not (repo and filename and branch):
+        if not (repo and filename):
             print "error: can not find client bundle with name %s" % bundle
         
-        return (repo, filename, branch)
+        return (repo, filename)
     
     def get_clientbundle_match(self, path):
         for key, value in self.__items(show_section=False):
@@ -143,5 +141,6 @@ class GitBundlerConfig(object):
                 if os.path.abspath(path).upper() == os.path.abspath(value).upper():
                     bundle = key.split(".")[2]
                     return self.get_clientbundle(bundle)
-        print "error: can not find client bundle match current path %s" % path                
-        return (None, None, None)
+
+        print "Error: can not find client bundle match current path %s" % path                
+        return (None, None)
