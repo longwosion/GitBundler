@@ -13,7 +13,7 @@ __author__ = 'Eric SHI'
 __author_email__ = 'longwosion@gmail.com'
 __license__ = 'BSD'
 __prog_name__ = 'gitb'
-version = __version__ = '0.0.1'
+version = __version__ = '0.0.2'
 
 class ConfigCommand(Command):
     name = 'config'
