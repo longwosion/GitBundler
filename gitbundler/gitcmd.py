@@ -47,8 +47,9 @@ class GitCmd(object):
         stdout, errout = self._exec('branch')
         errorstr = errout.read().strip()
         
-        print stdout.read().strip()
-        branch_list = stdout.read().strip().split("\n")
+        branch_list = stdout.read().strip()
+        print branch_list
+        branch_list = branch_list.split("\n")
         
         for branch in branch_list:
             if branch.startswith("* "):
