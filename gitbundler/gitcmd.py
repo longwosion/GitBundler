@@ -74,7 +74,7 @@ class GitCmd(object):
         return stdout.read().strip()
     
     def pull(self):
-        stdout, errout = self._exec('pull')
+        stdout, errout = self._exec('pull -v')
         errorstr = errout.read().strip()
         print errorstr
         return stdout.read().strip()
