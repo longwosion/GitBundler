@@ -185,6 +185,26 @@ class GitBundlerClient(object):
             #os.unlink(os.path.relpath(os.path.join(repo, filename)))
         else:
             print "error: git bundle download fails."
+            
+    def archive_bundle(self, bundlename, commit, output):
+        config = GitBundlerConfig()
+        repo, filename = config.get_clientbundle(bundlename)
+        if repo and filename:
+            self.archive(repo, filename, commit, output)
+            
+    def archive_dir(self, path, commit, output):
+        config = GitBundlerConfig()
+        repo, filename = config.get_clientbundle_match(path)
+    
+        if repo and filename:
+            self.archive(repo, filename, commit, output)
+            
+    def archive(self, repo, filename, commit, output):
+        git = GitCmd(filename, repo)
+        print git.archive(commit, output)
+        
+        
+        
         
         
 

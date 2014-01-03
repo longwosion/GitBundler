@@ -13,7 +13,18 @@ class GitCmd(object):
     def _exec(self, cmd, console=True):
         cmd = 'git %s' % str(cmd)
         if console:
-            print "git >> %s" % cmd
+            cmdline = cmd
+            width = 74
+            if len(cmdline) > width:
+                print "git> %s" % cmdline[0:width]
+                cmdline = cmdline[width:]
+                while len(cmdline) > width-2:
+                    print " . >   %s" % cmdline[0:width-2]
+                    cmdline = cmdline[width-2:]
+                print " . >   %s" % cmdline
+            else:
+                print "git> %s" % cmdline
+                
         #in_, out_, err_ = os.popen3(cmd, 't', cwd=self.path)
         
         p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE, cwd=self.path)
@@ -62,6 +73,41 @@ class GitCmd(object):
         print "  Current  :: master"
         return "master"
     
+    def get_filelist(self, commit):
+        stdout, errout = self._exec('diff-tree -r -c --no-commit-id --diff-filter=AMR --name-only %s' % commit)
+        filelist = stdout.read().splitlines()
+        
+        if filelist:
+            print " Files in commit %s:" % commit
+            for f in filelist:
+                print " * %s" % f
+            print ""
+        else:
+            print "[ERROR] There are no files in this commit %s" % commit
+        return filelist
+    
+    def get_rev_parse(self, commit):
+        stdout, errout = self._exec('rev-parse --verify -q %s' % commit)
+        rev = stdout.read().splitlines()
+        if rev:
+            print " Revision %s\n" % rev
+            return rev[0]
+        else:
+            print "[ERROR] Needed a single commit revision"
+            return None
+    
+    def archive(self, commit, output):
+        rev = self.get_rev_parse(commit)
+        if rev:
+            if not output:
+                output = "update-%s.zip" % rev[0:8]
+            files = self.get_filelist(rev)
+            if files:
+                stdout, errout = self._exec('archive --format zip -9 -o %s %s %s' % (output, rev, ' '.join(files)))
+                errorstr = errout.read().strip()
+                print errorstr
+                return stdout.read().strip()
+    
     def set_force_branch(self, branch):
         if branch and self.branch != branch:
             print "  Reset current  :: %s" % branch
@@ -84,7 +130,8 @@ class GitCmd(object):
             self.checkout(self.branch)
             stdout, errout = self._exec('pull %s %s' % (bundle, self.branch))
         else:
-            stdout, errout = self._exec('pull %s %s:%s' % (bundle, self.branch, self.branch))
+            stdout, errout = self._exec('fetch %s %s:%s' % (bundle, self.branch, self.branch))
+            self.checkout(self.branch)
         errorstr = errout.read().strip()
         print errorstr
         return stdout.read().strip()

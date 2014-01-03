@@ -40,7 +40,9 @@ gitb pull --branch req (第一次使用，本地没有req分支)
 
 实际执行的操作：
 * 读取当前分支。比如是req
-* 如果req分支不存在，执行 git pull ctasks2days req:req
+* 如果req分支不存在，执行 
+    * git fetch ctasks2days req:req
+    * git checkout req
 * 如果req分支存在，执行 
     * git checkout req
     * git pull ctasks2days req

@@ -172,6 +172,39 @@ class LocalPullCommand(Command):
                 
             if len(args) == 0:
                 server.lpush('local')
+                
+class ArchiveCommand(Command):
+    name = 'archive'
+    args = '<commit_id>'
+    has_options = True
+    option_list = (
+        make_option('-b', '--bundle', action="store", dest="bundle", help='client bundle name'),
+        make_option('-o', '--output', action="store", dest="output_filename", help="write the archive to this file"),
+    )
+    
+    def handle(self, options, global_options, *args):
+        from config import GitBundlerConfig
+        from server import GitBundlerClient
+        config = GitBundlerConfig()
+        
+        if len(args) >= 1:
+            client = GitBundlerClient()
+            if client:
+                ofile = None
+                commit_id = args[0]
+                if options.output_filename:
+                    ofile = options.output_filename
+                
+                if options.bundle:
+                    return client.archive_bundle(options.bundle, commit_id, ofile)
+                else:
+                    path = os.getcwd()
+                    return client.archive_dir(path, commit_id, ofile)
+                
+
+                    
+            return 
+        self.print_help(__prog_name__, self.name)
 
 register_command(ConfigCommand)
 register_command(PushCommand)
@@ -179,6 +212,7 @@ register_command(PullCommand)
 register_command(UploadCommand)    
 register_command(DownloadCommand)  
 register_command(LocalPullCommand)  
+register_command(ArchiveCommand)
 
 def main():
     modules = []
